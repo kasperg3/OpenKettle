@@ -1,0 +1,95 @@
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { srmToHex } from '@/calculators/color';
+import type { RecipeSummary } from '@/types';
+
+interface RecipeCardProps {
+  recipe: RecipeSummary;
+}
+
+function StatBadge({ label, value }: { label: string; value: string | number | undefined }) {
+  if (value === undefined || value === null) return null;
+  return (
+    <span className="inline-flex flex-col items-center rounded-md bg-muted px-2 py-1 text-center">
+      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
+      <span className="text-xs font-semibold text-foreground">{value}</span>
+    </span>
+  );
+}
+
+export function RecipeCard({ recipe }: RecipeCardProps) {
+  const srmColor = srmToHex(recipe.srm ?? 5);
+
+  return (
+    <div
+      className={cn(
+        'relative flex flex-col rounded-lg border border-border bg-card shadow-sm overflow-hidden',
+        'hover:border-amber-400 hover:shadow-md transition-all duration-200'
+      )}
+    >
+      {/* Beer color left border */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+        style={{ backgroundColor: srmColor }}
+      />
+
+      <div className="pl-4 pr-4 pt-4 pb-3 flex flex-col gap-2">
+        {/* Header */}
+        <div>
+          <h3 className="font-semibold text-foreground leading-tight line-clamp-2">
+            {recipe.name}
+          </h3>
+          {recipe.style_name && (
+            <p className="text-xs text-muted-foreground mt-0.5">{recipe.style_name}</p>
+          )}
+        </div>
+
+        {/* Description */}
+        {recipe.description && (
+          <p className="text-xs text-muted-foreground line-clamp-2">{recipe.description}</p>
+        )}
+
+        {/* Stats */}
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {recipe.og !== undefined && (
+            <StatBadge label="OG" value={recipe.og.toFixed(3)} />
+          )}
+          {recipe.fg !== undefined && (
+            <StatBadge label="FG" value={recipe.fg.toFixed(3)} />
+          )}
+          {recipe.abv !== undefined && (
+            <StatBadge label="ABV" value={`${recipe.abv.toFixed(1)}%`} />
+          )}
+          {recipe.ibu !== undefined && (
+            <StatBadge label="IBU" value={Math.round(recipe.ibu)} />
+          )}
+          {recipe.srm !== undefined && (
+            <span className="inline-flex flex-col items-center rounded-md bg-muted px-2 py-1 text-center">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">SRM</span>
+              <span className="flex items-center gap-1 text-xs font-semibold text-foreground">
+                <span
+                  className="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: srmColor }}
+                />
+                {recipe.srm.toFixed(1)}
+              </span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-2.5 border-t border-border bg-muted/30 flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">
+          {recipe.batch_size_l ? `${recipe.batch_size_l}L` : ''}
+        </span>
+        <a
+          href={`/#/recipes/${recipe.id}`}
+          className="text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
+        >
+          View Recipe →
+        </a>
+      </div>
+    </div>
+  );
+}
