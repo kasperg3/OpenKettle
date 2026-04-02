@@ -9,6 +9,8 @@ import { RecipeEditorPage } from '@/pages/RecipeEditorPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { LoginPage } from '@/pages/LoginPage';
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
+import { UserProfilePage } from '@/pages/UserProfilePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { useAuthStore } from '@/store/authStore';
 
@@ -36,8 +38,9 @@ export default function App() {
       <HashRouter>
         <AuthInitializer />
         <Routes>
-          {/* Login page has its own layout */}
+          {/* Standalone pages (no AppShell) */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* All other routes use AppShell */}
           <Route element={<AppShell />}>
@@ -48,6 +51,7 @@ export default function App() {
             <Route path="/recipes/:id/edit" element={<RecipeEditorPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/users/:username" element={<UserProfilePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

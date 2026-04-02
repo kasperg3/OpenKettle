@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 
 interface AuthGuardProps {
@@ -7,6 +8,14 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { user, loading } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login', { state: { from: location.pathname }, replace: true });
+    }
+  }, [loading, user, navigate, location]);
 
   if (loading) {
     return (
@@ -19,11 +28,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!user) {
-    // Redirect to login
-    window.location.hash = '/login';
-    return null;
-  }
+  if (!user) return null;
 
   return <>{children}</>;
 }

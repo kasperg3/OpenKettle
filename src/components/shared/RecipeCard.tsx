@@ -80,9 +80,20 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
 
       {/* Footer */}
       <div className="px-4 py-2.5 border-t border-border bg-muted/30 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">
-          {recipe.batch_size_l ? `${recipe.batch_size_l}L` : ''}
-        </span>
+        <div className="flex flex-col gap-0.5">
+          {recipe.batch_size_l ? (
+            <span className="text-xs text-muted-foreground">{recipe.batch_size_l}L</span>
+          ) : null}
+          {(recipe.author_username || recipe.author_display_name) && (
+            <a
+              href={`/#/users/${recipe.author_username ?? recipe.user_id}`}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              {recipe.author_display_name ?? recipe.author_username}
+            </a>
+          )}
+        </div>
         <a
           href={`/#/recipes/${recipe.id}`}
           className="text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"

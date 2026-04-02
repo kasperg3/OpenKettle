@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Edit, Copy, ArrowLeft } from 'lucide-react';
-import { useRecipe } from '@/hooks/useRecipes';
+import { useRecipe, useUserProfile } from '@/hooks/useRecipes';
 import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { srmToHex } from '@/calculators';
@@ -18,6 +18,7 @@ function StatBadge({ label, value }: { label: string; value: string }) {
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: recipe, isLoading, error } = useRecipe(id);
+  const { data: authorProfile } = useUserProfile(recipe?.user_id);
   const user = useAuthStore(s => s.user);
   const setDraft = useRecipeStore(s => s.setDraft);
   const navigate = useNavigate();
@@ -51,6 +52,17 @@ export function RecipeDetailPage() {
         <div>
           <h1 className="text-3xl font-bold">{recipe.name}</h1>
           {recipe.style_name && <div className="text-muted-foreground mt-0.5">{recipe.style_name}</div>}
+          {authorProfile && (
+            <div className="text-xs text-muted-foreground mt-1">
+              by{' '}
+              <Link
+                to={`/users/${authorProfile.username ?? recipe.user_id}`}
+                className="hover:text-foreground transition-colors"
+              >
+                {authorProfile.display_name ?? authorProfile.username ?? 'Anonymous'}
+              </Link>
+            </div>
+          )}
           {recipe.description && <p className="text-sm mt-2 text-muted-foreground">{recipe.description}</p>}
         </div>
       </div>

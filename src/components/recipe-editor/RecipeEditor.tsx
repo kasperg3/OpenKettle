@@ -14,6 +14,7 @@ import { NotesTab } from './NotesTab';
 import { useRecipeStore } from '@/store/recipeStore';
 import { useAuthStore } from '@/store/authStore';
 import { useSaveRecipe } from '@/hooks/useRecipes';
+import { useCalculations } from '@/hooks/useCalculations';
 import { cn } from '@/lib/utils';
 
 const TABS = [
@@ -32,12 +33,16 @@ export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
   const { draft, isDirty, isSaving, lastSaved, setDraft, setIsSaving, markSaved } = useRecipeStore();
   const user = useAuthStore((s) => s.user);
   const { mutateAsync: saveRecipe } = useSaveRecipe();
+  const stats = useCalculations();
 
   async function handleSave() {
     if (!user || isSaving) return;
     setIsSaving(true);
     try {
-      const saved = await saveRecipe(draft);
+      const saved = await saveRecipe({
+        draft,
+        stats: { og: stats.og, fg: stats.fg, abv: stats.abv, ibu: stats.ibu, srm: stats.srm, ebc: stats.ebc },
+      });
       setDraft({ ...draft, id: saved.id });
       markSaved();
       onSaved?.(saved.id);

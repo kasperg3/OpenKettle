@@ -4,6 +4,16 @@ import { useAuthStore } from '@/store/authStore';
 import { generateSlug } from '@/lib/utils';
 import type { Recipe, RecipeSummary, RecipeDraft } from '@/types';
 
+// Flatten Supabase join result
+function flattenAuthor(row: Record<string, unknown>): RecipeSummary {
+  const { user_profiles, ...rest } = row as { user_profiles: { username?: string; display_name?: string } | null } & Omit<RecipeSummary, 'author_username' | 'author_display_name'>;
+  return {
+    ...rest,
+    author_username: user_profiles?.username ?? undefined,
+    author_display_name: user_profiles?.display_name ?? undefined,
+  } as RecipeSummary;
+}
+
 // Public recipes
 export function usePublicRecipes(options?: {
   search?: string;
@@ -16,7 +26,7 @@ export function usePublicRecipes(options?: {
     queryFn: async () => {
       let q = supabase
         .from('recipes')
-        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,created_at,updated_at')
+        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,created_at,updated_at,user_profiles(username,display_name)')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(options?.limit ?? 24)
@@ -31,7 +41,7 @@ export function usePublicRecipes(options?: {
 
       const { data, error } = await q;
       if (error) throw error;
-      return (data ?? []) as RecipeSummary[];
+      return (data ?? []).map(r => flattenAuthor(r as unknown as Record<string, unknown>));
     },
   });
 }
@@ -45,11 +55,11 @@ export function useMyRecipes() {
       if (!user) return [];
       const { data, error } = await supabase
         .from('recipes')
-        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,created_at,updated_at')
+        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,created_at,updated_at,user_profiles(username,display_name)')
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data ?? []) as RecipeSummary[];
+      return (data ?? []).map(r => flattenAuthor(r as unknown as Record<string, unknown>));
     },
     enabled: !!user,
   });
@@ -73,20 +83,74 @@ export function useRecipe(id: string | undefined) {
   });
 }
 
+// User profile by user id
+export function useUserProfile(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['user_profile', userId],
+    queryFn: async () => {
+      if (!userId) throw new Error('No userId');
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('id,username,display_name,bio')
+        .eq('id', userId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; username?: string; display_name?: string; bio?: string } | null;
+    },
+    enabled: !!userId,
+  });
+}
+
+// User profile + public recipes by username
+export function useUserByUsername(username: string | undefined) {
+  return useQuery({
+    queryKey: ['user_by_username', username],
+    queryFn: async () => {
+      if (!username) throw new Error('No username');
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id,username,display_name,bio')
+        .eq('username', username)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      if (!profile) return null;
+
+      const { data: recipes, error: recipesError } = await supabase
+        .from('recipes')
+        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,created_at,updated_at')
+        .eq('user_id', profile.id)
+        .eq('is_public', true)
+        .order('updated_at', { ascending: false });
+      if (recipesError) throw recipesError;
+
+      return {
+        profile: profile as { id: string; username?: string; display_name?: string; bio?: string },
+        recipes: (recipes ?? []) as RecipeSummary[],
+      };
+    },
+    enabled: !!username,
+  });
+}
+
+export interface SaveRecipePayload {
+  draft: RecipeDraft;
+  stats?: { og?: number; fg?: number; abv?: number; ibu?: number; srm?: number; ebc?: number };
+}
+
 // Save (create or update)
 export function useSaveRecipe() {
   const qc = useQueryClient();
   const user = useAuthStore((s) => s.user);
 
   return useMutation({
-    mutationFn: async (draft: RecipeDraft) => {
+    mutationFn: async ({ draft, stats }: SaveRecipePayload) => {
       if (!user) throw new Error('Not authenticated');
 
       const payload = {
         ...draft,
+        ...(stats ?? {}),
         user_id: user.id,
         slug: generateSlug(draft.name),
-        // Cache computed stats for list views
         batch_size_l: draft.equipment_profile?.batch_size_l,
       };
 

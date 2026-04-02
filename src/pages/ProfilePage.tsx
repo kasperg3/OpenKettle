@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthGuard } from '@/components/shared/AuthGuard';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/lib/supabase';
@@ -9,6 +9,24 @@ function ProfileTab() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [saved, setSaved] = useState(false);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('user_profiles')
+      .select('username, display_name, bio')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) { setLoadError(error.message); return; }
+        if (data) {
+          setUsername(data.username ?? '');
+          setDisplayName(data.display_name ?? '');
+          setBio(data.bio ?? '');
+        }
+      });
+  }, [user]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -20,6 +38,7 @@ function ProfileTab() {
 
   return (
     <form onSubmit={handleSave} className="space-y-4 max-w-md">
+      {loadError && <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">{loadError}</div>}
       <div>
         <label className="text-sm font-medium">Email</label>
         <input className="w-full mt-1 px-3 py-2 text-sm border rounded-md bg-muted/50 text-muted-foreground" value={user?.email ?? ''} disabled />
