@@ -37,7 +37,8 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-          VITE_BASE_PATH: /OpenKettle/
+          # Custom domain (grontved.xyz) is served at the root, so base must be /
+          VITE_BASE_PATH: /
         run: npm run build
 
       - name: Upload Pages artifact
