@@ -1,5 +1,5 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Edit, Copy, ArrowLeft } from 'lucide-react';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Edit, GitFork, ArrowLeft } from 'lucide-react';
 import { useRecipe, useUserProfile } from '@/hooks/useRecipes';
 import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
@@ -23,16 +23,26 @@ export function RecipeDetailPage() {
   const user = useAuthStore(s => s.user);
   const setDraft = useRecipeStore(s => s.setDraft);
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (isLoading) return <SpinnerPage />;
   if (error || !recipe) return <div className="text-center py-24 text-muted-foreground">Recipe not found.</div>;
 
   const colorHex = srmToHex(recipe.srm ?? 5);
 
-  function handleClone() {
-    const r = recipe!;
-    const { id: _id, user_id: _uid, created_at: _ca, updated_at: _ua, ...rest } = r;
-    setDraft({ ...rest, name: `${r.name} (Clone)`, is_public: false });
+  function handleFork() {
+    if (!user) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+    const { id: _id, user_id: _uid, created_at: _ca, updated_at: _ua, slug: _slug, ...rest } = recipe!;
+    setDraft({
+      ...rest,
+      name: `${recipe!.name} (Fork)`,
+      is_public: true,
+      forked_from_id: recipe!.id,
+      forked_from_name: recipe!.name,
+    });
     navigate('/recipes/new');
   }
 
@@ -44,8 +54,21 @@ export function RecipeDetailPage() {
         {user?.id === recipe.user_id && (
           <Link to={`/recipes/${recipe.id}/edit`} className="flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-muted"><Edit className="h-4 w-4" /> Edit</Link>
         )}
-        <button onClick={handleClone} className="flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-muted"><Copy className="h-4 w-4" /> Clone</button>
+        <button onClick={handleFork} className="flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-muted">
+          <GitFork className="h-4 w-4" /> Fork
+        </button>
       </div>
+
+      {/* Fork lineage banner */}
+      {recipe.forked_from_id && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground px-3 py-2 bg-muted/40 rounded-lg border">
+          <GitFork className="h-3.5 w-3.5 flex-shrink-0" />
+          Forked from{' '}
+          <Link to={`/recipes/${recipe.forked_from_id}`} className="font-medium text-foreground hover:underline">
+            {recipe.forked_from_name ?? 'original recipe'}
+          </Link>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex gap-4 items-start">

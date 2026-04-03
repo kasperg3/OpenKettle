@@ -19,6 +19,8 @@ export interface Recipe {
   description?: string;
   style_id?: string;
   style_name?: string;
+  forked_from_id?: string;
+  forked_from_name?: string;
   og?: number;
   fg?: number;
   abv?: number;
@@ -68,4 +70,6 @@ export interface RecipeSummary {
   updated_at: string;
   author_username?: string;
   author_display_name?: string;
+  forked_from_id?: string;
+  forked_from_name?: string;
 }

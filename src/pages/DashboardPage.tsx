@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Globe, Lock } from 'lucide-react';
 import { AuthGuard } from '@/components/shared/AuthGuard';
+import { BeerXmlImport } from '@/components/shared/BeerXmlImport';
 import { useMyRecipes, useDeleteRecipe } from '@/hooks/useRecipes';
 import { formatGravity, formatABV, formatIBU } from '@/lib/utils';
 import { srmToHex } from '@/calculators';
@@ -24,9 +25,12 @@ export function DashboardPage() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">My Recipes</h1>
-          <Link to="/recipes/new" className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium text-sm">
-            <Plus className="h-4 w-4" /> New Recipe
-          </Link>
+          <div className="flex items-center gap-2">
+            <BeerXmlImport />
+            <Link to="/recipes/new" className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium text-sm">
+              <Plus className="h-4 w-4" /> New Recipe
+            </Link>
+          </div>
         </div>
 
         {isLoading ? (

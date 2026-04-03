@@ -25,7 +25,7 @@ export function usePublicRecipes(options?: {
     queryFn: async () => {
       let q = supabase
         .from('recipes')
-        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,created_at,updated_at,user_profiles(username,display_name)')
+        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,forked_from_id,forked_from_name,created_at,updated_at,user_profiles(username,display_name)')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(options?.limit ?? 24)
@@ -54,7 +54,7 @@ export function useMyRecipes() {
       if (!user) return [];
       const { data, error } = await supabase
         .from('recipes')
-        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,created_at,updated_at,user_profiles(username,display_name)')
+        .select('id,user_id,name,slug,description,style_id,style_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,forked_from_id,forked_from_name,created_at,updated_at,user_profiles(username,display_name)')
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
       if (error) throw error;
