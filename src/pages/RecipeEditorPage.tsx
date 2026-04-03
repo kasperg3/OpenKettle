@@ -4,6 +4,7 @@ import { AuthGuard } from '@/components/shared/AuthGuard';
 import { RecipeEditor } from '@/components/recipe-editor/RecipeEditor';
 import { useRecipeStore, EMPTY_DRAFT } from '@/store/recipeStore';
 import { useRecipe } from '@/hooks/useRecipes';
+import { SpinnerPage } from '@/components/shared/Spinner';
 
 function EditorWithLoad({ id }: { id: string }) {
   const { data: recipe, isLoading } = useRecipe(id);
@@ -17,13 +18,7 @@ function EditorWithLoad({ id }: { id: string }) {
     }
   }, [recipe, setDraft]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <SpinnerPage />;
 
   return <RecipeEditor onSaved={(savedId) => navigate(`/recipes/${savedId}/edit`, { replace: true })} />;
 }

@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { srmToHex } from '@/calculators';
 import { formatGravity, formatABV, formatIBU } from '@/lib/utils';
+import { SpinnerPage } from '@/components/shared/Spinner';
 
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
@@ -23,7 +24,7 @@ export function RecipeDetailPage() {
   const setDraft = useRecipeStore(s => s.setDraft);
   const navigate = useNavigate();
 
-  if (isLoading) return <div className="flex items-center justify-center py-24"><div className="h-8 w-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>;
+  if (isLoading) return <SpinnerPage />;
   if (error || !recipe) return <div className="text-center py-24 text-muted-foreground">Recipe not found.</div>;
 
   const colorHex = srmToHex(recipe.srm ?? 5);

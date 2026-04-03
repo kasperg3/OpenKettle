@@ -1,44 +1,50 @@
 import { useState, useEffect } from 'react';
 import { AuthGuard } from '@/components/shared/AuthGuard';
 import { useAuthStore } from '@/store/authStore';
+import { useUserProfile } from '@/hooks/useRecipes';
 import { supabase } from '@/lib/supabase';
 
 function ProfileTab() {
   const user = useAuthStore(s => s.user);
+  const { data: profile, error: loadError } = useUserProfile(user?.id);
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
+  const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState(false);
-  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    if (!user) return;
-    supabase
-      .from('user_profiles')
-      .select('username, display_name, bio')
-      .eq('id', user.id)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) { setLoadError(error.message); return; }
-        if (data) {
-          setUsername(data.username ?? '');
-          setDisplayName(data.display_name ?? '');
-          setBio(data.bio ?? '');
-        }
-      });
-  }, [user]);
+    if (profile) {
+      setUsername(profile.username ?? '');
+      setDisplayName(profile.display_name ?? '');
+      setBio(profile.bio ?? '');
+    }
+  }, [profile]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    await supabase.from('user_profiles').upsert({ id: user.id, display_name: displayName, username, bio });
+    setSaveError('');
+    const { error } = await supabase
+      .from('user_profiles')
+      .upsert({ id: user.id, display_name: displayName, username, bio });
+    if (error) { setSaveError(error.message); return; }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
 
   return (
     <form onSubmit={handleSave} className="space-y-4 max-w-md">
-      {loadError && <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">{loadError}</div>}
+      {loadError && (
+        <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+          Failed to load profile: {(loadError as Error).message}
+        </div>
+      )}
+      {saveError && (
+        <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+          {saveError}
+        </div>
+      )}
       <div>
         <label className="text-sm font-medium">Email</label>
         <input className="w-full mt-1 px-3 py-2 text-sm border rounded-md bg-muted/50 text-muted-foreground" value={user?.email ?? ''} disabled />

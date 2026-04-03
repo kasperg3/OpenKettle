@@ -2,16 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/authStore';
 import { generateSlug } from '@/lib/utils';
-import type { Recipe, RecipeSummary, RecipeDraft } from '@/types';
+import type { Recipe, RecipeSummary, RecipeDraft, UserProfile } from '@/types';
 
-// Flatten Supabase join result
-function flattenAuthor(row: Record<string, unknown>): RecipeSummary {
-  const { user_profiles, ...rest } = row as { user_profiles: { username?: string; display_name?: string } | null } & Omit<RecipeSummary, 'author_username' | 'author_display_name'>;
-  return {
-    ...rest,
-    author_username: user_profiles?.username ?? undefined,
-    author_display_name: user_profiles?.display_name ?? undefined,
-  } as RecipeSummary;
+type RowWithAuthor = Omit<RecipeSummary, 'author_username' | 'author_display_name'> & {
+  user_profiles: Pick<UserProfile, 'username' | 'display_name'> | null;
+};
+
+function flattenAuthor(row: RowWithAuthor): RecipeSummary {
+  const { user_profiles, ...rest } = row;
+  return { ...rest, author_username: user_profiles?.username, author_display_name: user_profiles?.display_name };
 }
 
 // Public recipes
@@ -41,7 +40,7 @@ export function usePublicRecipes(options?: {
 
       const { data, error } = await q;
       if (error) throw error;
-      return (data ?? []).map(r => flattenAuthor(r as unknown as Record<string, unknown>));
+      return (data ?? []).map(r => flattenAuthor(r as RowWithAuthor));
     },
   });
 }
@@ -59,7 +58,7 @@ export function useMyRecipes() {
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data ?? []).map(r => flattenAuthor(r as unknown as Record<string, unknown>));
+      return (data ?? []).map(r => flattenAuthor(r as RowWithAuthor));
     },
     enabled: !!user,
   });
@@ -95,7 +94,7 @@ export function useUserProfile(userId: string | undefined) {
         .eq('id', userId)
         .maybeSingle();
       if (error) throw error;
-      return data as { id: string; username?: string; display_name?: string; bio?: string } | null;
+      return data as UserProfile | null;
     },
     enabled: !!userId,
   });
@@ -124,7 +123,7 @@ export function useUserByUsername(username: string | undefined) {
       if (recipesError) throw recipesError;
 
       return {
-        profile: profile as { id: string; username?: string; display_name?: string; bio?: string },
+        profile: profile as UserProfile,
         recipes: (recipes ?? []) as RecipeSummary[],
       };
     },

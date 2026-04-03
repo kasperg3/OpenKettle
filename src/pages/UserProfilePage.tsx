@@ -2,18 +2,13 @@ import { useParams, Link } from 'react-router-dom';
 import { FlaskConical, ArrowLeft } from 'lucide-react';
 import { useUserByUsername } from '@/hooks/useRecipes';
 import { RecipeCard } from '@/components/shared/RecipeCard';
+import { SpinnerPage } from '@/components/shared/Spinner';
 
 export function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { data, isLoading, error } = useUserByUsername(username);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <SpinnerPage />;
 
   if (error || !data) {
     return (

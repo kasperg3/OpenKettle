@@ -1,4 +1,4 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { srmToHex } from '@/calculators/color';
 import type { RecipeSummary } from '@/types';
@@ -85,21 +85,20 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             <span className="text-xs text-muted-foreground">{recipe.batch_size_l}L</span>
           ) : null}
           {(recipe.author_username || recipe.author_display_name) && (
-            <a
-              href={`/#/users/${recipe.author_username ?? recipe.user_id}`}
+            <Link
+              to={`/users/${recipe.author_username ?? recipe.user_id}`}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              onClick={e => e.stopPropagation()}
             >
               {recipe.author_display_name ?? recipe.author_username}
-            </a>
+            </Link>
           )}
         </div>
-        <a
-          href={`/#/recipes/${recipe.id}`}
+        <Link
+          to={`/recipes/${recipe.id}`}
           className="text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
         >
           View Recipe →
-        </a>
+        </Link>
       </div>
     </div>
   );
