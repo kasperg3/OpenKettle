@@ -2,6 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Upgrade any accidental HTTP sub-resource requests to HTTPS.
+         Required when served behind a strict TLS proxy (e.g. Cloudflare Full Strict). -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="OpenKettle — Open-source brewing calculator and recipe database. Design beer recipes, calculate OG/FG/IBU/SRM, manage mash and fermentation profiles." />

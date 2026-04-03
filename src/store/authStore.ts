@@ -34,8 +34,19 @@ export const useAuthStore = create<AuthStore>((set) => ({
     });
 
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       set({ session, user: session?.user ?? null, loading: false });
+
+      // When the user arrives via a password-reset email, Supabase fires
+      // PASSWORD_RECOVERY regardless of whether the token was in the URL
+      // fragment (legacy implicit flow: #access_token=…) or a query-param
+      // code (PKCE flow: ?code=…).  In the implicit case HashRouter can't
+      // match the fragment to a route so ResetPasswordPage never mounts and
+      // its own listener never fires.  Force-navigate here so the page is
+      // always correct.
+      if (event === 'PASSWORD_RECOVERY' && !window.location.hash.startsWith('#/reset-password')) {
+        window.location.hash = '/reset-password';
+      }
     });
 
     return () => subscription.unsubscribe();

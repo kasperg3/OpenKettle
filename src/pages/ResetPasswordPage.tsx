@@ -11,10 +11,17 @@ export function ResetPasswordPage() {
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
 
-  // Supabase fires PASSWORD_RECOVERY when the user arrives via the reset link
   useEffect(() => {
+    // Check if an active recovery session already exists (user arrived via
+    // the reset link and authStore already processed the token).
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setReady(true);
+    });
+
+    // Also listen for the event in case the token exchange completes after
+    // this component mounts.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setReady(true);
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') setReady(true);
     });
     return () => subscription.unsubscribe();
   }, []);
