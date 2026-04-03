@@ -7,10 +7,11 @@ import type { FGMode } from '@/types';
  * Calibrated around 65°C (149°F) as neutral.
  */
 export function mashTempFermentabilityFactor(mashTempC: number): number {
-  // ~0.7% shift per degree C above/below 65°C
+  // ~0.7% shift per degree C above/below 65°C.
+  // Higher temp → less fermentable wort → factor < 1 → reduced effective attenuation → higher FG.
   const neutral = 65;
   const delta = mashTempC - neutral;
-  return 1 + delta * 0.007;
+  return 1 - delta * 0.007;
 }
 
 /**

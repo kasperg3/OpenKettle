@@ -37,7 +37,7 @@ export function tinsethIBU(
   const gallons = lToGal(batchSizeL);
   const utilization = tinsethBigness(wortGravity) * tinsethTimeFactor(boilTimeMin);
   const oz = gToOz(amountG);
-  return (utilization * (alphaAcidPct / 100) * oz * 74.89 * utilizationMultiplier) / gallons;
+  return (utilization * (alphaAcidPct / 100) * oz * 7489 * utilizationMultiplier) / gallons;
 }
 
 // ---------------------------------------------------------------------------
@@ -66,7 +66,7 @@ export function ragerIBU(
   const utilization = ragerUtilization(boilTimeMin) / 100;
   const gravAdj = ragerGravityAdjustment(wortGravity);
   const oz = gToOz(amountG);
-  return ((oz * (alphaAcidPct / 100) * utilization * 74.89) / (gallons * gravAdj)) * utilizationMultiplier;
+  return ((oz * (alphaAcidPct / 100) * utilization * 7489) / (gallons * gravAdj)) * utilizationMultiplier;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ export function danielsIBU(
   const gallons = lToGal(batchSizeL);
   const utilization = danielsUtilization(boilTimeMin);
   const oz = gToOz(amountG);
-  return ((oz * utilization * (alphaAcidPct / 100) * 74.89) / gallons) * utilizationMultiplier;
+  return ((oz * utilization * (alphaAcidPct / 100) * 7489) / gallons) * utilizationMultiplier;
 }
 
 // ---------------------------------------------------------------------------
