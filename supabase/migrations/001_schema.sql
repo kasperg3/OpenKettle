@@ -106,11 +106,15 @@ CREATE TABLE IF NOT EXISTS recipes (
     user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
 
     -- Identity
-    name        TEXT NOT NULL,
-    slug        TEXT,
-    description TEXT,
-    style_id    TEXT,
-    style_name  TEXT,
+    name             TEXT NOT NULL,
+    slug             TEXT,
+    description      TEXT,
+    style_id         TEXT,
+    style_name       TEXT,
+
+    -- Fork lineage
+    forked_from_id   UUID REFERENCES recipes(id) ON DELETE SET NULL,
+    forked_from_name TEXT,
 
     -- Cached computed metrics for list views / filtering
     og          NUMERIC(6,4),
@@ -151,6 +155,7 @@ CREATE INDEX IF NOT EXISTS idx_recipes_public   ON recipes (is_public, created_a
 CREATE INDEX IF NOT EXISTS idx_recipes_user     ON recipes (user_id, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_recipes_style    ON recipes (style_id) WHERE is_public = TRUE;
 CREATE INDEX IF NOT EXISTS idx_recipes_slug     ON recipes (slug);
+CREATE INDEX IF NOT EXISTS idx_recipes_forked   ON recipes (forked_from_id) WHERE forked_from_id IS NOT NULL;
 
 -- Full-text search
 ALTER TABLE recipes ADD COLUMN IF NOT EXISTS fts_vector TSVECTOR
@@ -161,6 +166,41 @@ ALTER TABLE recipes ADD COLUMN IF NOT EXISTS fts_vector TSVECTOR
     ) STORED;
 
 CREATE INDEX IF NOT EXISTS idx_recipes_fts ON recipes USING GIN (fts_vector);
+
+-- ============================================================
+-- RECIPE VERSIONS
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS recipe_versions (
+    id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recipe_id        UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    version_number   INT  NOT NULL,
+    name             TEXT NOT NULL DEFAULT '',
+    changes_summary  TEXT NOT NULL DEFAULT '',
+    draft            JSONB NOT NULL DEFAULT '{}',
+    stats            JSONB,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(recipe_id, version_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_recipe_versions_recipe ON recipe_versions (recipe_id);
+
+-- ============================================================
+-- BREW LOGS
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS brew_logs (
+    id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recipe_version_id   UUID NOT NULL REFERENCES recipe_versions(id) ON DELETE CASCADE,
+    brew_date           DATE,
+    actual_og           NUMERIC(6,4),
+    actual_fg           NUMERIC(6,4),
+    rating              INT CHECK (rating BETWEEN 1 AND 5),
+    notes               TEXT NOT NULL DEFAULT '',
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_brew_logs_version ON brew_logs (recipe_version_id);
 
 -- ============================================================
 -- updated_at TRIGGER

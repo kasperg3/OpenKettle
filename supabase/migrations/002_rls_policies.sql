@@ -3,12 +3,14 @@
 -- Run AFTER 001_schema.sql
 -- ============================================================
 
-ALTER TABLE recipes       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE fermentables  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE hops          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE yeasts        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE miscs         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recipes          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fermentables     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hops             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE yeasts           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE miscs            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_profiles    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recipe_versions  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE brew_logs        ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- RECIPES
@@ -73,3 +75,51 @@ CREATE POLICY "Users can update own profile"
 CREATE POLICY "Users can insert own profile"
     ON user_profiles FOR INSERT
     WITH CHECK (auth.uid() = id);
+
+-- ============================================================
+-- RECIPE VERSIONS
+-- ============================================================
+CREATE POLICY "Recipe versions follow recipe visibility"
+    ON recipe_versions FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM recipes
+            WHERE id = recipe_id AND (is_public = TRUE OR user_id = auth.uid())
+        )
+    );
+
+CREATE POLICY "Owner can insert recipe versions"
+    ON recipe_versions FOR INSERT
+    WITH CHECK (
+        EXISTS (SELECT 1 FROM recipes WHERE id = recipe_id AND user_id = auth.uid())
+    );
+
+CREATE POLICY "Owner can delete recipe versions"
+    ON recipe_versions FOR DELETE
+    USING (
+        EXISTS (SELECT 1 FROM recipes WHERE id = recipe_id AND user_id = auth.uid())
+    );
+
+-- ============================================================
+-- BREW LOGS
+-- ============================================================
+CREATE POLICY "Brew logs follow recipe visibility"
+    ON brew_logs FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM recipe_versions rv
+            JOIN recipes r ON r.id = rv.recipe_id
+            WHERE rv.id = recipe_version_id
+              AND (r.is_public = TRUE OR r.user_id = auth.uid())
+        )
+    );
+
+CREATE POLICY "Owner can manage brew logs"
+    ON brew_logs FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM recipe_versions rv
+            JOIN recipes r ON r.id = rv.recipe_id
+            WHERE rv.id = recipe_version_id AND r.user_id = auth.uid()
+        )
+    );
