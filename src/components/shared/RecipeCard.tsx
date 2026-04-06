@@ -21,22 +21,24 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
   const srmColor = srmToHex(recipe.srm ?? 5);
 
   return (
-    <div
+    <Link
+      to={`/recipes/${recipe.id}`}
       className={cn(
-        'relative flex flex-col rounded-lg border border-border bg-card shadow-sm overflow-hidden',
-        'hover:border-amber-400 hover:shadow-md transition-all duration-200'
+        'group relative flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden cursor-pointer',
+        'hover:border-amber-400 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200'
       )}
     >
-      {/* Beer color left border */}
+      {/* Beer color header band */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+        className="h-2 w-full flex-shrink-0"
         style={{ backgroundColor: srmColor }}
+        aria-hidden="true"
       />
 
-      <div className="pl-4 pr-4 pt-4 pb-3 flex flex-col gap-2">
+      <div className="px-4 pt-3 pb-3 flex flex-col gap-2 flex-1">
         {/* Header */}
         <div>
-          <h3 className="font-semibold text-foreground leading-tight line-clamp-2">
+          <h3 className="font-semibold text-foreground leading-tight line-clamp-2 group-hover:text-amber-600 transition-colors">
             {recipe.name}
           </h3>
           {recipe.style_name && (
@@ -50,7 +52,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         )}
 
         {/* Stats */}
-        <div className="flex flex-wrap gap-1.5 mt-1">
+        <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
           {recipe.og !== undefined && (
             <StatBadge label="OG" value={recipe.og.toFixed(3)} />
           )}
@@ -68,7 +70,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
               <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">SRM</span>
               <span className="flex items-center gap-1 text-xs font-semibold text-foreground">
                 <span
-                  className="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  className="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0 border border-black/10"
                   style={{ backgroundColor: srmColor }}
                 />
                 {recipe.srm.toFixed(1)}
@@ -82,24 +84,27 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       <div className="px-4 py-2.5 border-t border-border bg-muted/30 flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           {recipe.batch_size_l ? (
-            <span className="text-xs text-muted-foreground">{recipe.batch_size_l}L</span>
+            <span className="text-xs text-muted-foreground">{recipe.batch_size_l}L batch</span>
           ) : null}
           {(recipe.author_username || recipe.author_display_name) && (
-            <Link
-              to={`/users/${recipe.author_username ?? recipe.user_id}`}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            <span
+              onClick={e => e.preventDefault()}
+              className="text-xs text-muted-foreground"
             >
-              {recipe.author_display_name ?? recipe.author_username}
-            </Link>
+              <Link
+                to={`/users/${recipe.author_username ?? recipe.user_id}`}
+                className="hover:text-foreground transition-colors"
+                onClick={e => e.stopPropagation()}
+              >
+                {recipe.author_display_name ?? recipe.author_username}
+              </Link>
+            </span>
           )}
         </div>
-        <Link
-          to={`/recipes/${recipe.id}`}
-          className="text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
-        >
-          View Recipe →
-        </Link>
+        <span className="text-xs font-medium text-amber-600 group-hover:text-amber-500 transition-colors">
+          View →
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -13,9 +13,9 @@ import type { Brew } from '@/types';
 
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
-    <div className="text-center">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="font-bold text-lg">{value}</div>
+    <div className="flex flex-col items-center gap-0.5 min-w-[4rem]">
+      <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</div>
+      <div className="font-bold text-xl tabular-nums">{value}</div>
     </div>
   );
 }
@@ -76,35 +76,49 @@ export function RecipeDetailPage() {
       )}
 
       {/* Header */}
-      <div className="flex gap-4 items-start">
-        <div className="w-16 h-16 rounded-lg border-4 flex-shrink-0" style={{ backgroundColor: colorHex, borderColor: colorHex }} />
-        <div>
-          <h1 className="text-3xl font-bold">{recipe.name}</h1>
-          {recipe.style_name && <div className="text-muted-foreground mt-0.5">{recipe.style_name}</div>}
-          {authorProfile && (
-            <div className="text-xs text-muted-foreground mt-1">
-              by{' '}
-              <Link
-                to={`/users/${authorProfile.username ?? recipe.user_id}`}
-                className="hover:text-foreground transition-colors"
-              >
-                {authorProfile.display_name ?? authorProfile.username ?? 'Anonymous'}
-              </Link>
+      <div className="rounded-xl border border-border overflow-hidden">
+        {/* Beer color banner */}
+        <div className="h-3 w-full" style={{ backgroundColor: colorHex }} aria-hidden="true" />
+        <div className="p-5 flex gap-4 items-start">
+          <div
+            className="w-12 h-12 rounded-lg flex-shrink-0 border border-black/10 shadow-sm"
+            style={{ backgroundColor: colorHex }}
+            aria-label={`Beer color: ${recipe.srm?.toFixed(1) ?? '?'} SRM`}
+          />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold leading-tight">{recipe.name}</h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+              {recipe.style_name && (
+                <span className="text-sm text-muted-foreground">{recipe.style_name}</span>
+              )}
+              {authorProfile && (
+                <span className="text-xs text-muted-foreground">
+                  by{' '}
+                  <Link
+                    to={`/users/${authorProfile.username ?? recipe.user_id}`}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {authorProfile.display_name ?? authorProfile.username ?? 'Anonymous'}
+                  </Link>
+                </span>
+              )}
             </div>
-          )}
-          {recipe.description && <p className="text-sm mt-2 text-muted-foreground">{recipe.description}</p>}
+            {recipe.description && (
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{recipe.description}</p>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="flex flex-wrap gap-8 p-4 bg-muted/30 rounded-xl">
-        <StatBadge label="OG" value={formatGravity(recipe.og ?? 1)} />
-        <StatBadge label="FG" value={formatGravity(recipe.fg ?? 1)} />
-        <StatBadge label="ABV" value={formatABV(recipe.abv ?? 0)} />
-        <StatBadge label="IBU" value={formatIBU(recipe.ibu ?? 0)} />
-        <StatBadge label="SRM" value={(recipe.srm ?? 0).toFixed(1)} />
-        <StatBadge label="EBC" value={(recipe.ebc ?? 0).toFixed(1)} />
-        <StatBadge label="Batch" value={`${recipe.batch_size_l ?? '?'} L`} />
+        {/* Stats bar */}
+        <div className="border-t border-border bg-muted/30 px-5 py-4 flex flex-wrap gap-x-8 gap-y-3">
+          <StatBadge label="OG" value={formatGravity(recipe.og ?? 1)} />
+          <StatBadge label="FG" value={formatGravity(recipe.fg ?? 1)} />
+          <StatBadge label="ABV" value={formatABV(recipe.abv ?? 0)} />
+          <StatBadge label="IBU" value={formatIBU(recipe.ibu ?? 0)} />
+          <StatBadge label="SRM" value={(recipe.srm ?? 0).toFixed(1)} />
+          <StatBadge label="EBC" value={(recipe.ebc ?? 0).toFixed(1)} />
+          <StatBadge label="Batch" value={`${recipe.batch_size_l ?? '?'} L`} />
+        </div>
       </div>
 
       {/* Fermentables */}

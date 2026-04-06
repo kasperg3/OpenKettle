@@ -49,4 +49,21 @@
   }
   * { @apply border-border; }
   body { @apply bg-background text-foreground; }
+
+  /* Skip to content — visible only on focus for keyboard users */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100]
+           focus:px-4 focus:py-2 focus:rounded-lg focus:bg-amber-500 focus:text-white
+           focus:font-medium focus:text-sm focus:shadow-lg focus:outline-none;
+  }
+}
+
+/* Respect user's reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

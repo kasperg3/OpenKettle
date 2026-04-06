@@ -36,15 +36,21 @@ export function BrewsPanel({ recipeId, recipeOwnerId, onCompare }: Props) {
     if (a && b) onCompare(a, b);
   };
 
-  if (isLoading) return <p className="text-sm text-zinc-400 py-4">Loading brews…</p>;
+  if (isLoading) return (
+    <div className="space-y-2">
+      {[...Array(2)].map((_, i) => <div key={i} className="h-14 rounded-lg bg-muted animate-pulse" />)}
+    </div>
+  );
 
   if (brews.length === 0) {
     return (
-      <div className="text-center py-8 text-zinc-400">
-        <FlaskConical className="mx-auto mb-2 opacity-40" size={32} />
+      <div className="text-center py-10 border border-dashed rounded-xl text-muted-foreground">
+        <FlaskConical className="mx-auto mb-2 opacity-30" size={32} />
         <p className="text-sm">No brews logged yet.</p>
         {isOwner && (
-          <p className="text-xs mt-1">Use <strong>Start Brew</strong> in the recipe editor to begin a brew session.</p>
+          <p className="text-xs mt-1">
+            Use <strong className="text-foreground">Start Brew</strong> in the recipe editor to begin a brew session.
+          </p>
         )}
       </div>
     );
@@ -55,14 +61,14 @@ export function BrewsPanel({ recipeId, recipeOwnerId, onCompare }: Props) {
       {selected.length === 2 && (
         <button
           onClick={handleCompare}
-          className="flex items-center gap-2 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black text-sm font-medium rounded-lg w-full justify-center"
+          className="flex items-center gap-2 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg w-full justify-center transition-colors cursor-pointer"
         >
           <GitCompare size={16} />
-          Compare Brew #{brews.find(b => b.id === selected[0])?.brew_number} vs Brew #{brews.find(b => b.id === selected[1])?.brew_number}
+          Compare Brew #{brews.find(b => b.id === selected[0])?.brew_number} vs #{brews.find(b => b.id === selected[1])?.brew_number}
         </button>
       )}
       {selected.length === 1 && (
-        <p className="text-xs text-zinc-400 text-center">Select one more brew to compare</p>
+        <p className="text-xs text-muted-foreground text-center py-1">Select one more brew to compare</p>
       )}
 
       {brews.map(brew => (
@@ -99,29 +105,33 @@ function BrewRow({ brew, isOwner, isExpanded, isSelected, onToggleExpand, onTogg
     : null;
 
   return (
-    <div className={`border rounded-lg overflow-hidden transition-colors ${isSelected ? 'border-amber-500 bg-amber-500/5' : 'border-zinc-700 bg-zinc-800/50'}`}>
+    <div className={`border rounded-lg overflow-hidden transition-colors ${
+      isSelected ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20' : 'border-border bg-card'
+    }`}>
       {/* Summary row */}
       <div className="flex items-center gap-2 px-3 py-2.5">
         {/* Compare checkbox */}
         <button
           onClick={onToggleSelect}
-          title="Select for comparison"
-          className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
-            isSelected ? 'bg-amber-500 border-amber-500' : 'border-zinc-500 hover:border-amber-400'
+          aria-label={isSelected ? 'Deselect for comparison' : 'Select for comparison'}
+          className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors cursor-pointer ${
+            isSelected
+              ? 'bg-amber-500 border-amber-500 text-white'
+              : 'border-border hover:border-amber-400'
           }`}
         >
-          {isSelected && <span className="text-black text-[10px] font-bold">✓</span>}
+          {isSelected && <Check size={10} strokeWidth={3} />}
         </button>
 
         {/* Brew number badge */}
-        <span className="text-xs font-mono bg-zinc-700 text-zinc-300 px-1.5 py-0.5 rounded flex-shrink-0">
+        <span className="text-xs font-mono bg-muted text-muted-foreground px-1.5 py-0.5 rounded flex-shrink-0">
           #{brew.brew_number}
         </span>
 
         {/* Name + notes */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-zinc-100 truncate">{brew.name}</p>
-          {brew.notes && <p className="text-xs text-zinc-400 truncate">{brew.notes}</p>}
+          <p className="text-sm font-medium text-foreground truncate">{brew.name || `Brew #${brew.brew_number}`}</p>
+          {brew.notes && <p className="text-xs text-muted-foreground truncate">{brew.notes}</p>}
         </div>
 
         {/* Key measurements */}
@@ -144,33 +154,39 @@ function BrewRow({ brew, isOwner, isExpanded, isSelected, onToggleExpand, onTogg
             />
           )}
           {efficiency !== null && (
-            <span className="text-[11px] bg-zinc-700 text-zinc-300 px-1.5 py-0.5 rounded">
+            <span className="text-[11px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
               {efficiency}% eff.
             </span>
           )}
           {brew.rating && (
             <span className="flex items-center gap-0.5 text-amber-400">
-              {Array.from({ length: brew.rating }, (_, i) => <Star key={i} size={10} fill="currentColor" />)}
+              {Array.from({ length: brew.rating }, (_, i) => (
+                <Star key={i} size={10} fill="currentColor" />
+              ))}
             </span>
           )}
         </div>
 
         {/* Date */}
         {brew.brew_date && (
-          <span className="text-xs text-zinc-500 flex-shrink-0 hidden md:block">
+          <span className="text-xs text-muted-foreground flex-shrink-0 hidden md:block">
             {new Date(brew.brew_date).toLocaleDateString()}
           </span>
         )}
 
-        <button onClick={onToggleExpand} className="text-zinc-400 hover:text-zinc-200 flex-shrink-0">
+        <button
+          onClick={onToggleExpand}
+          aria-label={isExpanded ? 'Collapse brew details' : 'Expand brew details'}
+          className="text-muted-foreground hover:text-foreground flex-shrink-0 cursor-pointer"
+        >
           {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </button>
 
         {isOwner && (
           <button
             onClick={() => deleteBrew({ id: brew.id, recipeId: brew.recipe_id })}
-            className="text-zinc-600 hover:text-red-400 flex-shrink-0"
-            title="Delete brew"
+            className="text-muted-foreground/40 hover:text-destructive flex-shrink-0 cursor-pointer transition-colors"
+            aria-label="Delete brew"
           >
             <Trash2 size={14} />
           </button>
@@ -179,7 +195,7 @@ function BrewRow({ brew, isOwner, isExpanded, isSelected, onToggleExpand, onTogg
 
       {/* Expanded: full measurements */}
       {isExpanded && (
-        <div className="border-t border-zinc-700 p-3">
+        <div className="border-t border-border p-3 bg-muted/20">
           <BrewMeasurements brew={brew} isOwner={isOwner} />
         </div>
       )}
@@ -241,27 +257,47 @@ function BrewMeasurements({ brew, isOwner }: { brew: Brew; isOwner: boolean }) {
           <Field label="Actual FG" value={form.actual_fg?.toString() ?? ''} onChange={v => set('actual_fg', v)} placeholder="e.g. 1.010" />
           <Field label="Ferm. temp (°C)" value={form.fermentation_temp_c?.toString() ?? ''} onChange={v => set('fermentation_temp_c', v)} placeholder="e.g. 19" />
           <div className="space-y-0.5">
-            <span className="text-zinc-400">Rating</span>
+            <span className="text-muted-foreground">Rating</span>
             <div className="flex items-center gap-1 pt-1">
               {[1, 2, 3, 4, 5].map(n => (
-                <button key={n} type="button" onClick={() => setForm(p => ({ ...p, rating: p.rating === n ? undefined : n }))}>
-                  <Star size={14} className={n <= (form.rating ?? 0) ? 'text-amber-400' : 'text-zinc-600'} fill={n <= (form.rating ?? 0) ? 'currentColor' : 'none'} />
+                <button
+                  key={n}
+                  type="button"
+                  aria-label={`Rate ${n} star${n > 1 ? 's' : ''}`}
+                  onClick={() => setForm(p => ({ ...p, rating: p.rating === n ? undefined : n }))}
+                  className="cursor-pointer"
+                >
+                  <Star
+                    size={14}
+                    className={n <= (form.rating ?? 0) ? 'text-amber-400' : 'text-muted-foreground/30'}
+                    fill={n <= (form.rating ?? 0) ? 'currentColor' : 'none'}
+                  />
                 </button>
               ))}
             </div>
           </div>
         </div>
         <label className="block space-y-0.5 text-xs">
-          <span className="text-zinc-400">Notes</span>
-          <textarea rows={3} value={form.notes as string ?? ''} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
-            className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-zinc-100 resize-none text-xs" />
+          <span className="text-muted-foreground">Notes</span>
+          <textarea
+            rows={3}
+            value={form.notes as string ?? ''}
+            onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+            className="w-full bg-background border border-input rounded px-2 py-1 text-foreground resize-none text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+          />
         </label>
         <div className="flex gap-2">
-          <button onClick={handleSave} disabled={isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black text-xs font-medium rounded disabled:opacity-50">
+          <button
+            onClick={handleSave}
+            disabled={isPending}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 cursor-pointer"
+          >
             <Check size={12} />{isPending ? 'Saving…' : 'Save'}
           </button>
-          <button onClick={() => setEditing(false)} className="flex items-center gap-1.5 px-3 py-1.5 text-zinc-400 hover:text-zinc-200 text-xs">
+          <button
+            onClick={() => setEditing(false)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-muted-foreground hover:text-foreground text-xs transition-colors cursor-pointer"
+          >
             <X size={12} /> Cancel
           </button>
         </div>
@@ -271,7 +307,7 @@ function BrewMeasurements({ brew, isOwner }: { brew: Brew; isOwner: boolean }) {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1 text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1.5 text-xs">
         <MeasureRow label="Brew date" value={brew.brew_date ? new Date(brew.brew_date).toLocaleDateString() : undefined} />
         <MeasureRow label="Mash temp" value={brew.mash_temp_c} unit="°C" planned={brew.draft.mash_profile?.steps?.[0]?.temp_c} />
         <MeasureRow label="Mash pH" value={brew.mash_ph} />
@@ -284,22 +320,39 @@ function BrewMeasurements({ brew, isOwner }: { brew: Brew; isOwner: boolean }) {
         <MeasureRow label="Actual FG" value={brew.actual_fg?.toFixed(3)} planned={brew.planned_fg} planFmt={v => v.toFixed(3)} />
         <MeasureRow label="Ferm. temp" value={brew.fermentation_temp_c} unit="°C" />
         {brew.actual_og && brew.actual_fg && (
-          <MeasureRow label="Actual ABV" value={`${((brew.actual_og - brew.actual_fg) * 131.25).toFixed(1)}%`} planned={brew.planned_abv} planFmt={v => `${v.toFixed(1)}%`} />
+          <MeasureRow
+            label="Actual ABV"
+            value={`${((brew.actual_og - brew.actual_fg) * 131.25).toFixed(1)}%`}
+            planned={brew.planned_abv}
+            planFmt={v => `${v.toFixed(1)}%`}
+          />
         )}
       </div>
 
-      {brew.notes && <p className="text-xs text-zinc-300 whitespace-pre-wrap border-t border-zinc-700 pt-2">{brew.notes}</p>}
+      {brew.notes && (
+        <p className="text-xs text-muted-foreground whitespace-pre-wrap border-t border-border pt-2">
+          {brew.notes}
+        </p>
+      )}
 
       {brew.rating && (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {Array.from({ length: 5 }, (_, i) => (
-            <Star key={i} size={13} className={i < brew.rating! ? 'text-amber-400' : 'text-zinc-600'} fill={i < brew.rating! ? 'currentColor' : 'none'} />
+            <Star
+              key={i}
+              size={13}
+              className={i < brew.rating! ? 'text-amber-400' : 'text-muted-foreground/20'}
+              fill={i < brew.rating! ? 'currentColor' : 'none'}
+            />
           ))}
         </div>
       )}
 
       {isOwner && (
-        <button onClick={startEdit} className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-amber-400">
+        <button
+          onClick={startEdit}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer"
+        >
           <Pencil size={11} /> Edit measurements
         </button>
       )}
@@ -314,9 +367,14 @@ function Field({ label, value, onChange, placeholder, type = 'text' }: {
 }) {
   return (
     <label className="block space-y-0.5">
-      <span className="text-zinc-400">{label}</span>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full bg-zinc-800 border border-zinc-600 rounded px-1.5 py-1 text-zinc-100 text-xs placeholder-zinc-600" />
+      <span className="text-muted-foreground">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-background border border-input rounded px-1.5 py-1 text-foreground text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring"
+      />
     </label>
   );
 }
@@ -333,12 +391,12 @@ function MeasureRow({ label, value, unit, planned, planFmt }: {
   const hasDiff = planned !== undefined && typeof value === 'number' && Math.abs(value - planned) > 0.001;
   return (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-zinc-500 w-28 flex-shrink-0">{label}</span>
-      <span className={`font-medium ${hasDiff ? 'text-amber-300' : 'text-zinc-200'}`}>
+      <span className="text-muted-foreground w-24 flex-shrink-0">{label}</span>
+      <span className={`font-medium ${hasDiff ? 'text-amber-500' : 'text-foreground'}`}>
         {display}{unit ? ` ${unit}` : ''}
       </span>
       {planned !== undefined && planFmt && (
-        <span className="text-zinc-500 text-[10px]">planned {planFmt(planned)}</span>
+        <span className="text-muted-foreground/60 text-[10px]">plan: {planFmt(planned)}</span>
       )}
     </div>
   );
@@ -349,7 +407,9 @@ function MeasurePill({ label, value, planned, actual }: {
 }) {
   const off = planned && actual && Math.abs(actual - planned) > 0.002;
   return (
-    <span className={`text-[11px] px-1.5 py-0.5 rounded ${off ? 'bg-amber-500/20 text-amber-300' : 'bg-zinc-700 text-zinc-300'}`}>
+    <span className={`text-[11px] px-1.5 py-0.5 rounded ${
+      off ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-muted text-muted-foreground'
+    }`}>
       {label} {value}
     </span>
   );
