@@ -1,15 +1,15 @@
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { Edit, GitFork, ArrowLeft, GitCommitHorizontal } from 'lucide-react';
+import { Edit, GitFork, ArrowLeft, FlaskConical } from 'lucide-react';
 import { useRecipe, useUserProfile } from '@/hooks/useRecipes';
 import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { srmToHex } from '@/calculators';
 import { formatGravity, formatABV, formatIBU } from '@/lib/utils';
 import { SpinnerPage } from '@/components/shared/Spinner';
-import { RecipeVersionsPanel } from '@/components/recipe/RecipeVersionsPanel';
-import { VersionComparisonModal } from '@/components/recipe/VersionComparisonModal';
-import type { RecipeVersion } from '@/types';
+import { BrewsPanel } from '@/components/recipe/BrewsPanel';
+import { BrewComparisonModal } from '@/components/recipe/BrewComparisonModal';
+import type { Brew } from '@/types';
 
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
@@ -28,7 +28,7 @@ export function RecipeDetailPage() {
   const setDraft = useRecipeStore(s => s.setDraft);
   const navigate = useNavigate();
   const location = useLocation();
-  const [compareVersions, setCompareVersions] = useState<[RecipeVersion, RecipeVersion] | null>(null);
+  const [compareBrews, setCompareBrews] = useState<[Brew, Brew] | null>(null);
 
   if (isLoading) return <SpinnerPage />;
   if (error || !recipe) return <div className="text-center py-24 text-muted-foreground">Recipe not found.</div>;
@@ -175,24 +175,24 @@ export function RecipeDetailPage() {
         </div>
       )}
 
-      {/* Version history */}
+      {/* Brew history */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <GitCommitHorizontal className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">Version History</h2>
+          <FlaskConical className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Brew History</h2>
         </div>
-        <RecipeVersionsPanel
+        <BrewsPanel
           recipeId={recipe.id}
           recipeOwnerId={recipe.user_id}
-          onCompare={(a, b) => setCompareVersions([a, b])}
+          onCompare={(a, b) => setCompareBrews([a, b])}
         />
       </div>
 
-      {compareVersions && (
-        <VersionComparisonModal
-          a={compareVersions[0]}
-          b={compareVersions[1]}
-          onClose={() => setCompareVersions(null)}
+      {compareBrews && (
+        <BrewComparisonModal
+          a={compareBrews[0]}
+          b={compareBrews[1]}
+          onClose={() => setCompareBrews(null)}
         />
       )}
     </div>

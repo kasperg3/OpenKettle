@@ -1,6 +1,6 @@
 import type { RecipeDraft } from './recipe';
 
-export interface RecipeStats {
+export interface PlannedStats {
   og?: number;
   fg?: number;
   abv?: number;
@@ -9,42 +9,59 @@ export interface RecipeStats {
   ebc?: number;
 }
 
-export interface RecipeVersion {
+/** A brew is both the recipe snapshot AND all measurements for one brew session. */
+export interface Brew {
   id: string;
   recipe_id: string;
-  version_number: number;
+  brew_number: number;
   name: string;
-  changes_summary: string;
-  draft: RecipeDraft;
-  stats?: RecipeStats;
-  created_at: string;
-  brew_logs?: BrewLog[];
-}
-
-export interface BrewLog {
-  id: string;
-  recipe_version_id: string;
-  brew_date?: string;
-  actual_og?: number;
-  actual_fg?: number;
-  rating?: number;
   notes: string;
+
+  // Recipe state at brew start
+  draft: RecipeDraft;
+
+  // Planned (calculated) stats
+  planned_og?: number;
+  planned_fg?: number;
+  planned_abv?: number;
+  planned_ibu?: number;
+  planned_srm?: number;
+  planned_ebc?: number;
+
+  // Brew day
+  brew_date?: string;
+  mash_temp_c?: number;
+  mash_ph?: number;
+  pre_boil_volume_l?: number;
+  pre_boil_og?: number;
+  pre_boil_ph?: number;
+  post_boil_volume_l?: number;
+  actual_og?: number;
+  pitch_temp_c?: number;
+
+  // Fermentation
+  actual_fg?: number;
+  fermentation_temp_c?: number;
+
+  // Result
+  rating?: number;
+
   created_at: string;
+  updated_at: string;
 }
 
-export interface SaveVersionPayload {
+export interface StartBrewPayload {
   recipe_id: string;
   name: string;
-  changes_summary: string;
+  notes: string;
   draft: RecipeDraft;
-  stats?: RecipeStats;
+  planned_og?: number;
+  planned_fg?: number;
+  planned_abv?: number;
+  planned_ibu?: number;
+  planned_srm?: number;
+  planned_ebc?: number;
+  brew_date?: string;
 }
 
-export interface SaveBrewLogPayload {
-  recipe_version_id: string;
-  brew_date?: string;
-  actual_og?: number;
-  actual_fg?: number;
-  rating?: number;
-  notes: string;
-}
+export type UpdateBrewPayload = Partial<Omit<Brew, 'id' | 'recipe_id' | 'brew_number' | 'draft' | 'created_at' | 'updated_at'>>;

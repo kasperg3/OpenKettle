@@ -168,39 +168,54 @@ ALTER TABLE recipes ADD COLUMN IF NOT EXISTS fts_vector TSVECTOR
 CREATE INDEX IF NOT EXISTS idx_recipes_fts ON recipes USING GIN (fts_vector);
 
 -- ============================================================
--- RECIPE VERSIONS
+-- BREWS
+-- A brew captures a snapshot of the recipe at the moment you
+-- start brewing, plus all measurements taken throughout the day
+-- and fermentation. Starting a brew IS saving a version.
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS recipe_versions (
-    id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    recipe_id        UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
-    version_number   INT  NOT NULL,
-    name             TEXT NOT NULL DEFAULT '',
-    changes_summary  TEXT NOT NULL DEFAULT '',
-    draft            JSONB NOT NULL DEFAULT '{}',
-    stats            JSONB,
-    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(recipe_id, version_number)
+CREATE TABLE IF NOT EXISTS brews (
+    id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recipe_id            UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    brew_number          INT  NOT NULL,
+    name                 TEXT NOT NULL DEFAULT '',
+    notes                TEXT NOT NULL DEFAULT '',   -- what changed / general notes
+
+    -- Recipe snapshot at brew time
+    draft                JSONB NOT NULL DEFAULT '{}',
+
+    -- Planned stats (calculated at brew start)
+    planned_og           NUMERIC(6,4),
+    planned_fg           NUMERIC(6,4),
+    planned_abv          NUMERIC(5,2),
+    planned_ibu          NUMERIC(7,2),
+    planned_srm          NUMERIC(7,2),
+    planned_ebc          NUMERIC(7,2),
+
+    -- Brew day measurements
+    brew_date            DATE,
+    mash_temp_c          NUMERIC(5,2),   -- actual mash temperature
+    mash_ph              NUMERIC(4,2),   -- mash pH (target ~5.2–5.4)
+    pre_boil_volume_l    NUMERIC(6,2),
+    pre_boil_og          NUMERIC(6,4),   -- pre-boil gravity (efficiency check)
+    pre_boil_ph          NUMERIC(4,2),
+    post_boil_volume_l   NUMERIC(6,2),
+    actual_og            NUMERIC(6,4),   -- OG into fermenter
+    pitch_temp_c         NUMERIC(5,2),
+
+    -- Fermentation
+    actual_fg            NUMERIC(6,4),
+    fermentation_temp_c  NUMERIC(5,2),
+
+    -- Result
+    rating               INT CHECK (rating BETWEEN 1 AND 5),
+
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(recipe_id, brew_number)
 );
 
-CREATE INDEX IF NOT EXISTS idx_recipe_versions_recipe ON recipe_versions (recipe_id);
-
--- ============================================================
--- BREW LOGS
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS brew_logs (
-    id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    recipe_version_id   UUID NOT NULL REFERENCES recipe_versions(id) ON DELETE CASCADE,
-    brew_date           DATE,
-    actual_og           NUMERIC(6,4),
-    actual_fg           NUMERIC(6,4),
-    rating              INT CHECK (rating BETWEEN 1 AND 5),
-    notes               TEXT NOT NULL DEFAULT '',
-    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_brew_logs_version ON brew_logs (recipe_version_id);
+CREATE INDEX IF NOT EXISTS idx_brews_recipe ON brews (recipe_id);
 
 -- ============================================================
 -- updated_at TRIGGER
@@ -217,6 +232,7 @@ CREATE TRIGGER trg_hops_upd           BEFORE UPDATE ON hops           FOR EACH R
 CREATE TRIGGER trg_yeasts_upd         BEFORE UPDATE ON yeasts         FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_miscs_upd          BEFORE UPDATE ON miscs          FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_user_profiles_upd  BEFORE UPDATE ON user_profiles  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER trg_brews_upd          BEFORE UPDATE ON brews          FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ============================================================
 -- AUTO-CREATE user_profile ON SIGNUP
