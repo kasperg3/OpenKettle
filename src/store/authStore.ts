@@ -28,10 +28,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   initialize: () => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      set({ session, user: session?.user ?? null, loading: false });
-    });
+    // Get initial session; catch network/config failures so loading never hangs
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        set({ session, user: session?.user ?? null, loading: false });
+      })
+      .catch(() => {
+        set({ loading: false });
+      });
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {

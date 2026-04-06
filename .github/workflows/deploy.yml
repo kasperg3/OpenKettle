@@ -30,6 +30,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        continue-on-error: true
+
       - name: Type check
         run: npm run type-check
 
@@ -37,8 +41,10 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-          # Custom domain (grontved.xyz) is served at the root, so base must be /
-          VITE_BASE_PATH: /
+          # Hardcoded like HopDatabase's "homepage" in package.json —
+          # configure-pages outputs base_path=/ with a user-level custom domain,
+          # which would make Vite put assets at /assets/... instead of /OpenKettle/assets/...
+          VITE_BASE_PATH: /OpenKettle/
         run: npm run build
 
       - name: Upload Pages artifact

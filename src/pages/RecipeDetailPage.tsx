@@ -1,11 +1,15 @@
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Edit, GitFork, ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { Edit, GitFork, ArrowLeft, FlaskConical } from 'lucide-react';
 import { useRecipe, useUserProfile } from '@/hooks/useRecipes';
 import { useAuthStore } from '@/store/authStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { srmToHex } from '@/calculators';
 import { formatGravity, formatABV, formatIBU } from '@/lib/utils';
 import { SpinnerPage } from '@/components/shared/Spinner';
+import { BrewsPanel } from '@/components/recipe/BrewsPanel';
+import { BrewComparisonModal } from '@/components/recipe/BrewComparisonModal';
+import type { Brew } from '@/types';
 
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
@@ -24,6 +28,7 @@ export function RecipeDetailPage() {
   const setDraft = useRecipeStore(s => s.setDraft);
   const navigate = useNavigate();
   const location = useLocation();
+  const [compareBrews, setCompareBrews] = useState<[Brew, Brew] | null>(null);
 
   if (isLoading) return <SpinnerPage />;
   if (error || !recipe) return <div className="text-center py-24 text-muted-foreground">Recipe not found.</div>;
@@ -168,6 +173,27 @@ export function RecipeDetailPage() {
           <h2 className="text-xl font-semibold mb-2">Notes</h2>
           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{recipe.recipe_notes}</p>
         </div>
+      )}
+
+      {/* Brew history */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <FlaskConical className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Brew History</h2>
+        </div>
+        <BrewsPanel
+          recipeId={recipe.id}
+          recipeOwnerId={recipe.user_id}
+          onCompare={(a, b) => setCompareBrews([a, b])}
+        />
+      </div>
+
+      {compareBrews && (
+        <BrewComparisonModal
+          a={compareBrews[0]}
+          b={compareBrews[1]}
+          onClose={() => setCompareBrews(null)}
+        />
       )}
     </div>
   );
