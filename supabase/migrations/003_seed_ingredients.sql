@@ -48,7 +48,7 @@ INSERT INTO fermentables (name, type, color_ebc, ppg, fermentability, notes, ori
 ('Dried Malt Extract (DME) Pale', 'dry_extract', 9, 44, 75, 'Pale base DME', NULL),
 ('Dried Malt Extract (DME) Wheat', 'dry_extract', 9, 42, 75, 'Wheat DME, hazy beers', NULL),
 ('Liquid Malt Extract (LME) Pale', 'extract', 9, 36, 75, 'Pale LME for extract brewing', NULL),
-('Lactose (Milk Sugar)',   'sugar', 1,   41, 0,  'Unfermentable, adds sweetness and body', NULL),
+('Lactose (Milk Sugar)',   'sugar', 1,   41, 0,  'Unfermentable, adds sweetness and body', NULL)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -92,7 +92,7 @@ INSERT INTO hops (name, origin, alpha_acid, beta_acid, notes, aroma_profile) VAL
 ('Motueka',      'New Zealand', 7.0, 5.5, 'Lemon/lime, tropical', ARRAY['lemon','lime','tropical']),
 ('Waimea',       'New Zealand', 16.0, 7.0, 'Tangerine, pine, tropical', ARRAY['tangerine','pine','tropical']),
 ('Riwaka',       'New Zealand', 5.5, 4.5, 'Grapefruit, citrus, clean', ARRAY['grapefruit','citrus']),
-('Vic Secret',   'Australia', 14.5, 7.0, 'Passionfruit, pine, pineapple', ARRAY['passionfruit','pine','tropical']),
+('Vic Secret',   'Australia', 14.5, 7.0, 'Passionfruit, pine, pineapple', ARRAY['passionfruit','pine','tropical'])
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -100,12 +100,12 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 INSERT INTO yeasts (name, lab, code, type, form, min_attenuation, max_attenuation, avg_attenuation, min_temp_c, max_temp_c, flocculation, notes) VALUES
 -- Wyeast
-('American Ale',           'Wyeast', '1056', 'ale',   'liquid', 73, 77, 75, 16, 22, 'low-medium', 'Clean, neutral, very versatile. American ales, IPAs.'),
+('American Ale',           'Wyeast', '1056', 'ale',   'liquid', 73, 77, 75, 16, 22, 'medium', 'Clean, neutral, very versatile. American ales, IPAs.'),
 ('Chico Strain',           'Wyeast', '1272', 'ale',   'liquid', 72, 76, 74, 16, 22, 'medium',     'Balanced, fruity esters, dry finish. Pale ales.'),
 ('American Ale II',        'Wyeast', '1272', 'ale',   'liquid', 72, 76, 74, 16, 22, 'medium',     'Slightly fruity, clean. American ales.'),
 ('London Ale III',         'Wyeast', '1318', 'ale',   'liquid', 71, 75, 73, 16, 22, 'high',       'Soft, round, fruity. New England IPAs.'),
 ('Irish Ale',              'Wyeast', '1084', 'ale',   'liquid', 71, 75, 73, 16, 22, 'medium',     'Slightly fruity, dry finish. Irish stouts.'),
-('Belgian Witbier',        'Wyeast', '3944', 'ale',   'liquid', 72, 76, 74, 18, 24, 'low-medium', 'Spicy, phenolic, citrus. Witbiers.'),
+('Belgian Witbier',        'Wyeast', '3944', 'ale',   'liquid', 72, 76, 74, 18, 24, 'medium', 'Spicy, phenolic, citrus. Witbiers.'),
 ('Trappist High Gravity',  'Wyeast', '3787', 'ale',   'liquid', 74, 78, 76, 18, 26, 'medium',     'Fruity/spicy Belgian. Tripels, dubbels.'),
 ('Bavarian Weizen',        'Wyeast', '3068', 'ale',   'liquid', 73, 77, 75, 18, 24, 'low',        'Classic German weizen, banana/clove balance.'),
 ('German Lager',           'Wyeast', '2124', 'lager', 'liquid', 73, 77, 75, 8,  15, 'medium',     'Smooth, clean lager. Czech/German lagers.'),
@@ -129,7 +129,7 @@ INSERT INTO yeasts (name, lab, code, type, form, min_attenuation, max_attenuatio
 ('Safale S-04',            'Fermentis', 'S-04',  'ale',   'dry', 74, 82, 78, 15, 24, 'high',        'English ale, fruity/clean, high flocculation.'),
 ('Saflager W-34/70',       'Fermentis', 'W-34/70','lager','dry', 73, 77, 75, 9,  15, 'high',        'Weihenstephan lager strain. Most popular dry lager.'),
 ('Saflager S-23',          'Fermentis', 'S-23',  'lager','dry', 82, 86, 84, 9,  15, 'medium',      'Western European lager, slightly fruity.'),
-('Safbrew WB-06',          'Fermentis', 'WB-06', 'ale',  'dry', 86, 90, 88, 15, 24, 'low',         'Wheat beer, fruity with low flocculation.'),
+('Safbrew WB-06',          'Fermentis', 'WB-06', 'ale',  'dry', 86, 90, 88, 15, 24, 'low',         'Wheat beer, fruity with low flocculation.')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -157,5 +157,5 @@ INSERT INTO miscs (name, type, use_for, notes) VALUES
 ('Cacao Nibs',          'flavor',       'secondary', 'Chocolate flavor in stouts. Sanitize with vodka first.'),
 ('Coffee (Whole Bean)', 'flavor',       'secondary', 'Cold brew method: coarsely grind, steep in beer cold for 12-24 hrs.'),
 ('Lactose (Milk Sugar)','other',        'boil',      'Unfermentable sweetener. Add to boil for milk stouts and pastry beers.'),
-('Honey',               'sugar',        'primary',   'Add post-boil or to primary. Adds fermentable sugar and floral aroma.'),
+('Honey',               'other',        'primary',   'Add post-boil or to primary. Adds fermentable sugar and floral aroma.')
 ON CONFLICT DO NOTHING;

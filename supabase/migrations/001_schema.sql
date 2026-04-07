@@ -3,14 +3,12 @@
 -- Run this in: Supabase Dashboard → SQL Editor
 -- ============================================================
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- ============================================================
 -- GLOBAL INGREDIENT REFERENCE TABLES
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS fermentables (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name            TEXT NOT NULL,
     type            TEXT NOT NULL CHECK (type IN ('grain','adjunct','sugar','extract','dry_extract','fruit','other')),
     color_ebc       NUMERIC(6,2) NOT NULL DEFAULT 0,
@@ -30,7 +28,7 @@ CREATE TABLE IF NOT EXISTS fermentables (
 );
 
 CREATE TABLE IF NOT EXISTS hops (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name            TEXT NOT NULL,
     origin          TEXT,
     alpha_acid      NUMERIC(5,2) NOT NULL DEFAULT 5.0,
@@ -49,7 +47,7 @@ CREATE TABLE IF NOT EXISTS hops (
 );
 
 CREATE TABLE IF NOT EXISTS yeasts (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name            TEXT NOT NULL,
     lab             TEXT NOT NULL,
     code            TEXT,
@@ -70,7 +68,7 @@ CREATE TABLE IF NOT EXISTS yeasts (
 );
 
 CREATE TABLE IF NOT EXISTS miscs (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        TEXT NOT NULL,
     type        TEXT NOT NULL CHECK (type IN ('spice','fining','water_agent','herb','flavor','other')),
     use_for     TEXT,
@@ -102,7 +100,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS recipes (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
 
     -- Identity
@@ -175,7 +173,7 @@ CREATE INDEX IF NOT EXISTS idx_recipes_fts ON recipes USING GIN (fts_vector);
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS brews (
-    id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     recipe_id            UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
     brew_number          INT  NOT NULL,
     name                 TEXT NOT NULL DEFAULT '',
