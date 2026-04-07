@@ -14,9 +14,10 @@ export const supabaseConfigError: string | null =
 // Fall back to placeholder values so modules that import `supabase` don't
 // fail to load. API calls will fail with network errors, which TanStack Query
 // surfaces gracefully rather than crashing the app.
+// Use || (not ??) because GitHub Actions sets unset secrets to "" not undefined.
 export const supabase = createClient(
-  supabaseUrl ?? 'https://placeholder.supabase.co',
-  supabaseKey ?? 'placeholder-key',
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseKey || 'placeholder-key',
   {
     auth: {
       persistSession: true,
