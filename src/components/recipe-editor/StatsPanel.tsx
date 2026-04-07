@@ -19,6 +19,11 @@ function StatCard({ label, value, sub, color }: { label: string; value: string; 
   );
 }
 
+function fmt(n: number): string {
+  // Strip floating-point noise: round to 1 decimal, then drop trailing .0
+  return parseFloat(n.toFixed(1)).toString();
+}
+
 function StyleBar({ label, value, min, max }: { label: string; value: number; min: number; max: number }) {
   const range = max - min;
   if (range <= 0) return null;
@@ -36,7 +41,7 @@ function StyleBar({ label, value, min, max }: { label: string; value: number; mi
           style={{ left: `${pct}%`, backgroundColor: inRange ? '#22c55e' : '#ef4444' }}
         />
       </div>
-      <span className="text-muted-foreground">{min}–{max}</span>
+      <span className="text-muted-foreground">{fmt(min)}–{fmt(max)}</span>
     </div>
   );
 }
@@ -71,8 +76,8 @@ export function StatsPanel() {
 
       {style && (
         <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 max-w-xl">
-          <StyleBar label="OG" value={(stats.og - 1) * 1000} min={(style.og_min - 1) * 1000} max={(style.og_max - 1) * 1000} />
-          <StyleBar label="FG" value={(stats.fg - 1) * 1000} min={(style.fg_min - 1) * 1000} max={(style.fg_max - 1) * 1000} />
+          <StyleBar label="OG" value={Math.round((stats.og - 1) * 1000)} min={Math.round((style.og_min - 1) * 1000)} max={Math.round((style.og_max - 1) * 1000)} />
+          <StyleBar label="FG" value={Math.round((stats.fg - 1) * 1000)} min={Math.round((style.fg_min - 1) * 1000)} max={Math.round((style.fg_max - 1) * 1000)} />
           <StyleBar label="ABV" value={stats.abv} min={style.abv_min} max={style.abv_max} />
           <StyleBar label="IBU" value={stats.ibu} min={style.ibu_min} max={style.ibu_max} />
           <StyleBar label="SRM" value={stats.srm} min={style.srm_min} max={style.srm_max} />
