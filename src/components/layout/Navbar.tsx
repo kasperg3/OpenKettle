@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Beer, Sun, Moon, LogOut, Plus, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
@@ -29,21 +30,21 @@ export function Navbar() {
 
   const navLinks = (
     <>
-      <a
-        href="/#/recipes"
+      <Link
+        to="/recipes"
         onClick={() => setMobileOpen(false)}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         Recipes
-      </a>
+      </Link>
       {user && (
-        <a
-          href="/#/dashboard"
+        <Link
+          to="/dashboard"
           onClick={() => setMobileOpen(false)}
           className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Dashboard
-        </a>
+        </Link>
       )}
     </>
   );
@@ -53,13 +54,13 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <a
-            href="/#/"
+          <Link
+            to="/"
             className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity"
           >
             <Beer className="h-7 w-7 text-amber-500" />
             <span className="text-amber-500">OpenKettle</span>
-          </a>
+          </Link>
 
           {/* Center nav — desktop */}
           <div className="hidden md:flex items-center gap-6">
@@ -81,13 +82,13 @@ export function Navbar() {
                 <span className="text-sm text-muted-foreground select-none">
                   {user.email?.split('@')[0]}
                 </span>
-                <a
-                  href="/#/recipes/new"
+                <Link
+                  to="/recipes/new"
                   className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   New Recipe
-                </a>
+                </Link>
                 <button
                   onClick={() => signOut()}
                   className="rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
@@ -97,12 +98,12 @@ export function Navbar() {
                 </button>
               </>
             ) : (
-              <a
-                href="/#/login"
+              <Link
+                to="/login"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 Sign In
-              </a>
+              </Link>
             )}
           </div>
 
@@ -138,14 +139,14 @@ export function Navbar() {
               {user ? (
                 <>
                   <div className="text-sm text-muted-foreground">{user.email}</div>
-                  <a
-                    href="/#/recipes/new"
+                  <Link
+                    to="/recipes/new"
                     onClick={() => setMobileOpen(false)}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors w-full justify-center"
                   >
                     <Plus className="h-4 w-4" />
                     New Recipe
-                  </a>
+                  </Link>
                   <button
                     onClick={() => { signOut(); setMobileOpen(false); }}
                     className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors w-full justify-center cursor-pointer"
@@ -155,13 +156,13 @@ export function Navbar() {
                   </button>
                 </>
               ) : (
-                <a
-                  href="/#/login"
+                <Link
+                  to="/login"
                   onClick={() => setMobileOpen(false)}
                   className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors w-full"
                 >
                   Sign In
-                </a>
+                </Link>
               )}
             </div>
           </div>

@@ -34,7 +34,11 @@ export function LoginPage() {
     setError('');
     if (password !== confirm) { setError('Passwords do not match'); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` },
+    });
     setLoading(false);
     if (error) { setError(error.message); return; }
     setMessage('Account created! Check your email to confirm before signing in.');
@@ -44,7 +48,10 @@ export function LoginPage() {
     e.preventDefault();
     if (!email) { setError('Enter your email first'); return; }
     setError(''); setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ email });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` },
+    });
     setLoading(false);
     if (error) { setError(error.message); return; }
     setMessage('Magic link sent! Check your email.');

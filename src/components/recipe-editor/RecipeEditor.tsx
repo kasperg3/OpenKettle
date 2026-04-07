@@ -1,4 +1,5 @@
 import * as Tabs from '@radix-ui/react-tabs';
+import { Link } from 'react-router-dom';
 import { Save, CheckCircle, Loader2, AlertCircle, FlaskConical, X } from 'lucide-react';
 import { useState } from 'react';
 import { RecipeHeader } from './RecipeHeader';
@@ -97,7 +98,7 @@ export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
             </button>
           </div>
         ) : (
-          <a href="/#/login" className="text-xs text-amber-600 hover:underline">Sign in to save</a>
+          <Link to="/login" className="text-xs text-amber-600 hover:underline">Sign in to save</Link>
         )}
       </div>
 
