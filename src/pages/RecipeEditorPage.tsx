@@ -34,7 +34,7 @@ export function RecipeEditorPage() {
 
   return (
     <AuthGuard>
-      <div className="h-[calc(100vh-57px)] flex flex-col overflow-hidden">
+      <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
         {id ? (
           <EditorWithLoad id={id} />
         ) : (
