@@ -72,7 +72,7 @@ export function useRecipe(id: string | undefined) {
       if (!id) throw new Error('No id');
       const { data, error } = await supabase
         .from('recipes')
-        .select('*')
+        .select('id,user_id,name,slug,description,style_id,style_name,forked_from_id,forked_from_name,og,fg,abv,ibu,srm,ebc,batch_size_l,is_public,tags,version,fermentables,hops,yeasts,miscs,mash_profile,fermentation_profile,water_profile,equipment_profile,recipe_notes,batch_notes,created_at,updated_at')
         .eq('id', id)
         .single();
       if (error) throw error;
