@@ -1,4 +1,3 @@
-import * as Tabs from '@radix-ui/react-tabs';
 import { Link } from 'react-router-dom';
 import { Save, CheckCircle, Loader2, AlertCircle, FlaskConical, X } from 'lucide-react';
 import { useState } from 'react';
@@ -10,7 +9,6 @@ import { YeastTab } from './YeastTab';
 import { MiscTab } from './MiscTab';
 import { MashTab } from './MashTab';
 import { FermentationTab } from './FermentationTab';
-import { WaterTab } from './WaterTab';
 import { EquipmentTab } from './EquipmentTab';
 import { NotesTab } from './NotesTab';
 import { useRecipeStore } from '@/store/recipeStore';
@@ -21,17 +19,6 @@ import { useCalculations } from '@/hooks/useCalculations';
 import { cn } from '@/lib/utils';
 import type { RecipeDraft } from '@/types';
 
-const TABS = [
-  { id: 'fermentables', label: 'Fermentables' },
-  { id: 'hops',         label: 'Hops' },
-  { id: 'yeast',        label: 'Yeast' },
-  { id: 'misc',         label: 'Misc' },
-  { id: 'mash',         label: 'Mash' },
-  { id: 'fermentation', label: 'Fermentation' },
-  { id: 'water',        label: 'Water' },
-  { id: 'equipment',    label: 'Equipment' },
-  { id: 'notes',        label: 'Notes' },
-];
 
 export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
   const { draft, isDirty, isSaving, lastSaved, setDraft, setIsSaving, markSaved } = useRecipeStore();
@@ -132,31 +119,35 @@ export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
         />
       )}
 
-      <Tabs.Root defaultValue="fermentables" className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        <Tabs.List className="flex border-b overflow-x-auto bg-card px-4 gap-0.5 flex-shrink-0">
-          {TABS.map((tab) => (
-            <Tabs.Trigger
-              key={tab.id}
-              value={tab.id}
-              className="px-3 py-2.5 text-sm whitespace-nowrap text-muted-foreground border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:text-foreground hover:text-foreground transition-colors"
-            >
-              {tab.label}
-            </Tabs.Trigger>
-          ))}
-        </Tabs.List>
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="p-4 space-y-4">
 
-        <div className="flex-1 overflow-y-auto">
-          <Tabs.Content value="fermentables"><FermentablesTab /></Tabs.Content>
-          <Tabs.Content value="hops"><HopsTab /></Tabs.Content>
-          <Tabs.Content value="yeast"><YeastTab /></Tabs.Content>
-          <Tabs.Content value="misc"><MiscTab /></Tabs.Content>
-          <Tabs.Content value="mash"><MashTab /></Tabs.Content>
-          <Tabs.Content value="fermentation"><FermentationTab /></Tabs.Content>
-          <Tabs.Content value="water"><WaterTab /></Tabs.Content>
-          <Tabs.Content value="equipment"><EquipmentTab /></Tabs.Content>
-          <Tabs.Content value="notes"><NotesTab /></Tabs.Content>
+          {/* Row 1: Fermentables (wider) + Hops */}
+          <div className="grid grid-cols-1 xl:grid-cols-[3fr_2fr] gap-4 items-start">
+            <div className="border rounded-lg bg-card"><FermentablesTab /></div>
+            <div className="border rounded-lg bg-card"><HopsTab /></div>
+          </div>
+
+          {/* Row 2: Misc + Yeast */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div className="border rounded-lg bg-card"><MiscTab /></div>
+            <div className="border rounded-lg bg-card"><YeastTab /></div>
+          </div>
+
+          {/* Row 3: Mash + Fermentation */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div className="border rounded-lg bg-card"><MashTab /></div>
+            <div className="border rounded-lg bg-card"><FermentationTab /></div>
+          </div>
+
+          {/* Row 4: Equipment + Notes */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div className="border rounded-lg bg-card"><EquipmentTab /></div>
+            <div className="border rounded-lg bg-card"><NotesTab /></div>
+          </div>
+
         </div>
-      </Tabs.Root>
+      </div>
     </div>
   );
 }

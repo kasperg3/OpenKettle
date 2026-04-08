@@ -5,18 +5,23 @@ import { RecipeEditor } from '@/components/recipe-editor/RecipeEditor';
 import { useRecipeStore, EMPTY_DRAFT } from '@/store/recipeStore';
 import { useRecipe } from '@/hooks/useRecipes';
 import { SpinnerPage } from '@/components/shared/Spinner';
+import { useAuthStore } from '@/store/authStore';
 
 function EditorWithLoad({ id }: { id: string }) {
   const { data: recipe, isLoading } = useRecipe(id);
   const setDraft = useRecipeStore(s => s.setDraft);
   const navigate = useNavigate();
+  const user = useAuthStore(s => s.user);
 
   useEffect(() => {
-    if (recipe) {
-      const { created_at: _ca, updated_at: _ua, ...rest } = recipe;
-      setDraft(rest);
+    if (!recipe) return;
+    if (recipe.user_id !== user?.id) {
+      navigate(`/recipes/${id}`, { replace: true });
+      return;
     }
-  }, [recipe, setDraft]);
+    const { created_at: _ca, updated_at: _ua, ...rest } = recipe;
+    setDraft(rest);
+  }, [recipe, user, id, setDraft, navigate]);
 
   if (isLoading) return <SpinnerPage />;
 
