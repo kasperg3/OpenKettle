@@ -40,10 +40,12 @@ export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
   const { mutateAsync: startBrew, isPending: isStartingBrew } = useStartBrew();
   const stats = useCalculations();
   const [showBrewModal, setShowBrewModal] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function handleSave() {
     if (!user || isSaving) return;
     setIsSaving(true);
+    setSaveError(null);
     try {
       const saved = await saveRecipe({
         draft,
@@ -54,6 +56,7 @@ export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
       onSaved?.(saved.id);
     } catch (err) {
       console.error('Save failed:', err);
+      setSaveError(err instanceof Error ? err.message : 'Save failed. Check your Supabase connection.');
       setIsSaving(false);
     }
   }
@@ -67,8 +70,9 @@ export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
       <div className="flex items-center justify-between px-4 py-2 bg-card border-b text-sm gap-2">
         <div className="flex items-center gap-2 text-muted-foreground">
           {isSaving && <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</>}
-          {!isSaving && isDirty && <><AlertCircle className="h-3.5 w-3.5 text-amber-500" /> Unsaved changes</>}
-          {!isSaving && !isDirty && lastSaved && <><CheckCircle className="h-3.5 w-3.5 text-green-500" /> Saved {lastSaved.toLocaleTimeString()}</>}
+          {!isSaving && saveError && <><AlertCircle className="h-3.5 w-3.5 text-destructive" /> <span className="text-destructive text-xs truncate max-w-xs">{saveError}</span></>}
+          {!isSaving && !saveError && isDirty && <><AlertCircle className="h-3.5 w-3.5 text-amber-500" /> Unsaved changes</>}
+          {!isSaving && !saveError && !isDirty && lastSaved && <><CheckCircle className="h-3.5 w-3.5 text-green-500" /> Saved {lastSaved.toLocaleTimeString()}</>}
         </div>
         {user ? (
           <div className="flex items-center gap-2">
@@ -128,7 +132,7 @@ export function RecipeEditor({ onSaved }: { onSaved?: (id: string) => void }) {
         />
       )}
 
-      <Tabs.Root defaultValue="fermentables" className="flex-1 flex flex-col overflow-hidden">
+      <Tabs.Root defaultValue="fermentables" className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <Tabs.List className="flex border-b overflow-x-auto bg-card px-4 gap-0.5 flex-shrink-0">
           {TABS.map((tab) => (
             <Tabs.Trigger
